@@ -1,0 +1,23 @@
+{
+  "name": "momentum",
+  "description": "simple, yet powerful note taking app for engineers ",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0",
+    "app-layout": "PolymerElements/app-layout#^2.0.0",
+    "iron-pages": "PolymerElements/iron-pages#^2.0.0",
+    "iron-form": "PolymerElements/iron-form#^2.0.0",
+    "app-route": "PolymerElements/app-route#^2.0.0",
+    "iron-icon": "PolymerElements/iron-icon#^2.0.0",
+    "iron-icons": "PolymerElements/iron-icons#^2.0.0",
+    "iron-list": "PolymerElements/iron-list#^2.0.0",
+    "js-cookie": "^2.2.0",
+    "moment": "^2.19.3",
+    "iron-input": "PolymerElements/iron-input#^2.0.0",
+    "paper-input": "PolymerElements/paper-input#^2.0.5"
+  },
+  "devDependencies": {
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  }
+}

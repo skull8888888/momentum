@@ -1,0 +1,95 @@
+<dom-module id="editor-tools-module">
+    <template>
+        <style include="shared-styles">
+            .tools{
+                width: 100px;
+                font-size: 14px;
+                padding: 8px 16px;
+                color: white;
+                background-color: black;
+                text-align: center;
+                z-index: 2;
+                border-radius: 4px;
+                height: 28px;
+                cursor: pointer;              
+            }
+            iron-icon, span{
+                z-index: 2
+            }
+            .triangle{
+                position: absolute;
+                left: 64px;
+                bottom: -4px;
+                z-index: 1;
+                background: white;
+                width:10px;
+                height: 10px;
+                -webkit-transform:rotate(45deg);
+                transform:rotate(45deg);
+                border-radius:2px;
+                background-color: black
+            }
+            .hilight{
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background-color: yellow
+            }
+        </style>
+        <div class="tools layout horizontal center justified">
+            <iron-icon icon="editor:title" onmousedown="event.preventDefault();" onclick="editAction('title')"></iron-icon>
+            <iron-icon icon="editor:format-bold" onmousedown="event.preventDefault();" onclick="editAction('bold')"></iron-icon>
+            <iron-icon icon="editor:format-italic" onmousedown="event.preventDefault();" onclick="editAction('italic')"></iron-icon>
+            <span class="hilight" onmousedown="event.preventDefault();" onclick="editAction('highlight')"></span>
+            <div class="triangle"></div>
+        </div>
+    </template>
+    <script>
+        class EditorToolsModule extends Polymer.Element {
+
+            static get is() { return 'editor-tools-module' }
+
+            static get properties() {
+                return {
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+
+                setTimeout(_ => {
+                    document.addEventListener('click', e => {
+                        if(e.composedPath()[1] == this.parentNode || e.composedPath()[0] == this.parentNode){
+                            setTimeout(_ => {
+                                this.remove()
+                            })
+                        } else if (!this.isInside(e.composedPath(), this)){
+                            this.remove()
+                        }
+
+                    })
+                })
+
+            }
+
+            isInside(arr,node){
+
+                var inside = false
+
+                arr.forEach((el) => {
+                    if (el == node) inside = true
+                }, this);
+
+                return inside
+            }
+
+
+        }
+        customElements.define(EditorToolsModule.is, EditorToolsModule);
+    </script>
+</dom-module>

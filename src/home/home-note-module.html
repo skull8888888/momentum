@@ -1,0 +1,60 @@
+<dom-module id="home-note-module">
+    <template>
+        <style include="shared-styles">
+
+            :host{
+                background-color: red
+            }
+
+            .descriotion{
+                color: var(--paper-grey-500);
+                font-weight: 300;
+                font-size: 12px;
+            }
+            .note{
+                padding: 16px 0px;
+                border-bottom: solid var(--paper-grey-300) 1px;
+            }
+            .name{
+                padding: 16px 0px;
+                font-size: 24px;
+                font-weight: 600
+            }
+
+            .modified{
+                color:var(--paper-grey-700)
+            }
+        </style>
+        <div class="note">
+            <div class="name">[[note.name]]</div>
+            <div class="modified">modified [[parseTimestamp(note.modified)]], created [[parseTimestamp(note.created)]]</div>
+        </div>
+    </template>
+    <script>
+        class HomeNoteModule extends Polymer.Element {
+
+            static get is() { return 'home-note-module' }
+
+            static get properties() {
+                return {
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            parseTimestamp(time){
+                return moment(time).format('MMM DD')
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+
+            }
+
+        }
+        customElements.define(HomeNoteModule.is, HomeNoteModule);
+    </script>
+</dom-module>

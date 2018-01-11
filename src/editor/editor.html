@@ -1,0 +1,664 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="../../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
+		<script src="../math-tex/mathjax-loader.js"></script>
+		<script src="../math-tex/math-tex.js"></script>
+
+		<script src="../../bower_components/moment/moment.js"></script>
+		<script src="../../bower_components/js-cookie/src/js.cookie.js"></script>
+
+		<!--importing fabric-->
+		<script type="text/javascript" src="fabric.min.js"></script>
+
+		<!--importing firebase -->
+		<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-firestore.js"></script>
+		<script>
+			var config = {
+				apiKey: "AIzaSyAjyvmMKHB5v1v25-JvJpxQuaLSpTsJGA4",
+				authDomain: "momentum-2a71c.firebaseapp.com",
+				databaseURL: "https://momentum-2a71c.firebaseio.com",
+				projectId: "momentum-2a71c",
+				storageBucket: "momentum-2a71c.appspot.com",
+				messagingSenderId: "314824018866"
+			};
+			firebase.initializeApp(config)
+			const db = firebase.firestore()
+			const auth = firebase.auth()
+		</script>
+
+		<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+		<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+		<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+		<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+		<link rel="import" href="../../bower_components/iron-icons/image-icons.html">
+		<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+		<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+
+
+		<link rel="import" href="editor-formula-module.html">
+		<link rel="import" href="editor-canvas-module.html">
+		<link rel="import" href="editor-highlight-remove-module.html">
+		<link rel="import" href="editor-bookmarks-module.html">
+		<link rel="import" href="editor-tools-module.html">
+		<link rel="import" href="../shared-styles.html">
+		
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,800|Lato:400,900|Roboto+Slab:700" rel="stylesheet">
+		<style>
+
+		body{
+			padding: 0;
+			margin: 0;
+			min-height: 100vh;
+			min-width: 100vw;
+			font-family: 'Open Sans';
+			--app-main-color: #e74c3c;
+			--app-secondary-color: black;
+			--paper-grey-50: #fafafa;
+			--paper-grey-100: #f5f5f5;
+			--paper-grey-200: #eeeeee;
+			--paper-grey-300: #e0e0e0;
+			--paper-grey-400: #bdbdbd;
+			--paper-grey-500: #9e9e9e;
+			--paper-grey-600: #757575;
+			--paper-grey-700: #616161;
+			--paper-grey-800: #424242;
+			--paper-grey-900: #212121;
+		}
+
+		#editor:focus {
+			outline: none
+		}    
+		#editor {
+			margin-top: 80px;
+			min-height: 100vh;
+			padding-left: 10%;
+			color: #424242;
+			font-weight: 300;
+			width: 50vw;
+			line-height: 32px;
+			font-size: 20px;
+			height: 100vh;
+			font-family: 'Lato';
+			padding-bottom: 64px
+		}
+
+
+		iron-icon {
+			color: var(--paper-grey-600);
+			cursor: pointer
+		}
+
+		h2{
+			font-weight: 800;
+			color: black
+		}
+
+		#editor h2:first-of-type {
+			font-size: 36px;
+		}
+
+		h2:first-of-type:empty::before { 
+			color: lightgray;
+			font-size: 30px;
+		}
+/*
+		p:first-of-type:empty::before{ 
+			content: '.';
+			color: var(--paper-grey-300);
+			width: 100%
+		}*/
+
+		.separator{
+			border-right: solid 2px var(--paper-grey-300);
+			width: 1px;
+			margin-right: 4px
+		}
+
+		.footer{
+			top: calc(100vh - 24px);
+			height: 24px;
+			position: fixed;
+			left: 48px;
+			width: calc(100vw - 48px);
+			z-index: 99;
+			background-color: var(--paper-grey-200);
+			display: flex;
+			padding-left: 10%;
+			flex-direction: row;
+			-ms-flex-align: center;
+			-webkit-align-items: center;
+			align-items: center;
+		}
+
+		.avatar{
+			position: absolute;
+			right: 128px;
+		}
+		
+		#header div {
+			display: inline;
+			line-height: 24px;
+		}
+
+		img{
+			width: 100%
+		}
+
+		figure{
+			margin: 0
+		}
+
+		@media all and (max-width: 800px) {
+			#editor {
+			padding: 0px 25%
+			}
+		}
+
+		@media all and (max-width: 500px) {
+			#editor {
+			padding: 0px 16px
+			}
+		}
+
+		#status{
+			width:100px;
+			height:40px;
+		}
+
+		h3{
+			margin-bottom: -20px;
+		}
+
+		#backIcon{
+			width: 28px;
+			height: 28px;
+			margin-top: 19px;
+			margin-left: 16px;
+			position: absolute
+		}
+		paper-progress{
+			width: 100vw;
+			top: 62px;
+			position: absolute;
+			--paper-progress-active-color: #e91e63;
+			--paper-progress-height: 2px
+		}
+		
+		.highlight{
+			background-color: yellow
+		}
+
+		#logo{
+			font-weight: 700;
+			font-size: 22px;
+			font-family: 'Roboto Slab';
+			margin-left: 10%;
+			/*background-color: rebeccapurple*/
+		}
+
+		#status{
+			color: var(--paper-grey-600);
+			font-size: 12px;
+			line-height: 24px;
+			height: 24px;
+			/*background-color: purple;*/
+			margin-left: 16px;
+		}
+		.bottom{
+			height: 100px
+		}
+
+		#tools{
+			position: fixed;
+			height: 100vh;
+			top:0;
+			background-color: var(--paper-grey-300);
+			text-align: center;
+			width: 48px;
+			z-index: 100;
+			display: flex;
+			flex-direction: column;
+			-ms-flex-align: center;
+			-webkit-align-items: center;
+			align-items: center;
+		}
+		#tools div {
+			margin: 4px 0px;
+			cursor: pointer;
+		}
+		.logo{
+			font-weight: 800;
+			font-size: 28px;
+			padding-bottom: 8px;
+			border-bottom: 1px solid var(--paper-grey-500);
+			width: 36px;
+			color:transparent;
+			margin-left: 4px;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="footer">
+			<div id="status"></div>
+			<paper-progress id="progress"></paper-progress>
+		</div>
+		<div id="tools">
+			<div class="logo" href="/">m</div>
+			<div onmousedown="event.preventDefault();" onclick="editAction('func')">f(x)</div>
+			<div icon="editor:functions" onmousedown="event.preventDefault();" onclick="editAction('canvas')">C</div>
+			<div icon="image:photo" onmousedown="event.preventDefault();" onclick="editAction('image')">I</div>
+		</div>
+		<editor-bookmarks-module id="bookmarks"></editor-bookmarks-module>
+		<div id="editor" contenteditable="true" onkeyup="editorTextChanged(this)">
+		</div>
+	</body>
+		<script>
+
+		var noteId, fullNoteRef, noteRef, initialName, currentHighlight,currentBatchId
+
+		var formulas = []
+		var sketchs = []
+		const editor = document.getElementById('editor')
+
+
+		window.onload = reload()
+		var abovetooltip = false
+
+		function backToMain(){
+			top.window.history.pushState({page: 'another'}, 'another page', '/')
+		}
+
+		function reload(id){
+
+			document.getElementById('progress').indeterminate = true
+
+			if(id){
+				noteId = id
+			} else {
+				let arr = document.referrer.split('/')
+				noteId = arr[arr.length - 1]
+			}
+			
+			editor.innerHTML = ""
+
+			db.collection('fullNotes').doc(noteId).get().then(doc => {
+
+				document.getElementById('progress').indeterminate = false
+
+				initialName = doc.data().initialName
+
+				document.styleSheets[0].addRule('h2:first-of-type:empty::before','content: "' + initialName + '";');			
+
+				editor.innerHTML = doc.data().innerHTML
+
+				if(!editor.querySelector('canvas.bottom')){
+					const bottom = document.createElement('canvas')
+					bottom.setAttribute('class','bottom')
+					editor.appendChild(bottom)
+				}
+
+				const spans = document.querySelectorAll('span')
+
+				spans.forEach(function(span) {
+					setHighlightListeners(span)
+				}, this)
+				updateBookmarks()
+
+				if(document.querySelector('editor-tools-module'))
+					document.querySelector('editor-tools-module').parentNode.removeChild(document.querySelector('editor-tools-module'))
+				if(document.querySelector('editor-highlight-module'))
+					document.querySelector('editor-highlight-module').parentNode.removeChild(document.querySelector('editor-highlight-module'))
+
+
+				editor.addEventListener('keypress', function(ev){
+					setTimeout( _ => { 
+						if(ev.keyCode == '13'){
+						document.execCommand('formatBlock', false, 'p');
+						}
+					})
+				}, false);
+
+				this.addEventListener('formula-added', e => {
+					setTimeout( _ => {
+						var range = this.range
+						const sel = this.sel
+						const lastNode = this.lastNode
+						range = range.cloneRange()
+						range.setStartAfter(lastNode)
+						range.collapse(true)
+						sel.removeAllRanges()
+						sel.addRange(range)
+					})
+				})
+
+				this.addEventListener('delete-highlight', e => {
+
+					var p = currentHighlight.parentNode
+
+					while( currentHighlight.firstChild ) {
+						p.insertBefore(  currentHighlight.firstChild, currentHighlight );
+					}
+					p.removeChild( currentHighlight )
+
+
+					const els = document.querySelectorAll('editor-highlight-module')
+					els.forEach(function(el) {
+						el.parentNode.removeChild(el)	
+					}, this)
+
+					updateBookmarks()
+					updateFullNote()
+
+				})
+
+				this.addEventListener('context-changed', e => {
+					updateFullNote()
+				})
+									
+				fullNoteRef = db.collection('fullNotes').doc(noteId)
+				noteRef = db.collection('notes').doc(noteId)
+
+				setTimeout(_ => {
+					editor.focus()
+				})
+			})
+
+			editor.addEventListener('mouseup', function(e){
+				if (document.getSelection().toString() != "") {showTools()}
+			}, false);
+
+		}
+
+		function showTools(){
+
+			const ts = document.querySelector('editor-tools-module')
+
+			if(!ts){
+
+				const range = window.getSelection().getRangeAt(0)
+				const rect = range.getBoundingClientRect()
+
+				const t = document.createElement('editor-tools-module')
+
+				t.style.position = 'absolute'
+				t.style.top = (rect.top + window.scrollY - 48) + 'px'
+				t.style.left = (rect.left + window.scrollX + rect.width / 2 - 68) + 'px'
+				editor.appendChild(t)
+
+			}
+
+		}
+
+		function updateBookmarks(){
+
+			formulas = []
+			sketchs = []
+
+			const bookmarks = [...document.querySelectorAll('span')].map(snap => {
+
+				var node = {
+					id: snap.id,
+					node: snap
+				}
+
+				if(snap.tagName == "SPAN") {
+					if(snap.style.backgroundColor != 'yellow') return
+					node.type = "highlight"
+					node.text = snap.innerText
+				} else if(snap.tagName == "EDITOR-FORMULA-MODULE") {
+					formulas.push(snap)
+					node.type = 'formula'
+					node.text = `Formula(${formulas.length})`
+				} else if(snap.tagName == "EDITOR-CANVAS-MODULE") {
+					sketchs.push(snap)
+					node.type = 'sketch'
+					node.text = `Sketch(${sketchs.length})`
+				} 
+
+				return node
+			})	
+
+			document.getElementById('bookmarks').bookmarks = bookmarks	
+		}
+
+		function updateFullNote(){
+
+			document.getElementById('status').innerText = "Saving..."
+
+			currentBatchId = generateId()
+			const batchId = currentBatchId
+			
+			setTimeout(_ => {
+
+				const batch = db.batch()
+
+				batch.update(fullNoteRef, {
+					innerHTML: editor.innerHTML
+				})
+
+				batch.update(noteRef, {
+					modified: Date.now(),
+					name: document.getElementById('name').innerText != "" ? document.getElementById('name').innerText: initialName
+				})	
+
+				console.log(document.getElementById('name') ? document.getElementById('name').innerText: initialName)
+
+
+				if(currentBatchId == batchId){
+
+					batch.commit().then(() => {		
+						document.getElementById('status').innerText = "Saved"
+						console.log("changes saved")
+					}).catch(err => {
+						console.log(err)
+					})
+				}
+
+			},500)
+
+		}
+
+		function editorTextChanged(editor) {
+
+			var els = document.querySelectorAll('#editor h2:first-of-type')
+
+			els.forEach(function(el) {
+				if (el.innerHTML == "<br>"){
+					el.innerHTML = ""
+				}
+			}, this);
+
+			if(editor.innerHTML == ""){
+				setTimeout(_ => {
+					editor.innerHTML = 
+					`
+					<h2 id="name"></h2>
+					`
+				})
+			}
+			updateFullNote()
+		}
+
+		function editAction(action){
+
+			switch (action) {
+			case 'title':
+				document.execCommand('formatBlock', false,`h3`)
+				break
+			case 'image':
+				_inputImageDialog();
+				break
+			case 'func':  
+				pasteHtmlAtCaret(`<editor-formula-module id="${generateId()}"></editor-formula-module>&nbsp`)
+				break
+			case 'canvas':  
+				pasteHtmlAtCaret(`<editor-canvas-module id="${generateId()}"></editor-canvas-module>`)
+				break
+			case 'highlight':
+				document.execCommand("hiliteColor", false, "yellow");
+				highlight()
+				break
+			default:
+				document.execCommand(action, false)
+				break;
+			}
+
+			updateBookmarks()
+			updateFullNote()
+		}
+
+		function highlight(){
+
+			var p = window.getSelection().anchorNode.parentNode;
+			p.id = generateId()
+			const firstLetter = window.getSelection().toString()[0]
+			const restText = window.getSelection().toString().substring(1)
+			p.innerHTML = `<span class="anchor">${firstLetter}</span>${restText}`
+			setHighlightListeners(p)
+			updateBookmarks()
+		}
+
+		function generateId(){
+			return db.collection('notes').doc().id
+		}
+
+		function scrollToId(e){
+			
+			window.scroll({
+				behavior: 'smooth',
+				left: 0,
+				top: document.getElementById(e).offsetTop - 70
+			})
+			
+		}
+
+		function setHighlightListeners(span){
+
+			if(span.style.backgroundColor == "yellow"){
+				span.onmouseover = (e) => {
+
+					setTimeout(_ => {
+
+					}, 50)
+
+					currentHighlight = e.target
+
+					const rect = e.target.querySelector('span.anchor').getBoundingClientRect()
+
+					const h = document.createElement('editor-highlight-remove-module')
+
+					h.style.position = 'absolute'
+					h.style.top = (rect.top + window.scrollY - 38) + 'px'
+					h.style.left = (rect.left + window.scrollX - 38) + 'px'
+
+					editor.appendChild(h)
+
+					h.onmouseover = (e) => {
+						abovetooltip = true
+					}
+
+					h.onmouseout = (e) => {
+						abovetooltip = false
+						const els = document.querySelectorAll('editor-highlight-remove-module')
+						els.forEach(function(el) {
+							el.parentNode.removeChild(el)	
+						}, this);
+					}
+
+				}
+
+				span.onmouseout = (e) => {
+					setTimeout(_ => {
+
+						if(abovetooltip == false){
+							const els = document.querySelectorAll('editor-highlight-remove-module')
+							els.forEach(function(el) {
+								el.parentNode.removeChild(el)	
+							}, this);
+
+						}
+					},100)
+				}	
+			}
+
+		}
+
+		function _inputImageDialog() {
+
+			const imageFile = document.createElement('input');
+			imageFile.setAttribute('type', 'file');
+			
+			imageFile.onchange = event => {
+
+			if (event.currentTarget.files.length > 0) {
+
+				const fileToLoad = event.currentTarget.files[0];
+				const fileReader = new FileReader()
+				
+				fileReader.onload = fileLoadedEvent => {
+
+				const srcData = fileLoadedEvent.target.result; // base64!
+			
+				pasteHtmlAtCaret(`
+				<img src=${srcData}>
+				`)
+
+				}
+
+				fileReader.readAsDataURL(fileToLoad)
+
+			}
+			}
+
+			imageFile.click();
+			return false;
+		}
+
+
+		function pasteHtmlAtCaret(html, element) {
+
+			var sel, range;
+			if (window.getSelection) {
+
+				sel = window.getSelection()
+				this.sel = sel
+				if (sel.getRangeAt && sel.rangeCount) {
+					range = sel.getRangeAt(0);
+					range.deleteContents();
+					this.range = range
+					var el = document.createElement("span");
+					el.innerHTML = html;
+					if(element){
+					el.appendChild(element)
+					}
+					var frag = document.createDocumentFragment(), node, lastNode;
+					while ( (node = el.firstChild) ) {
+						lastNode = frag.appendChild(node);
+						this.lastNode = lastNode
+					}
+					range.insertNode(frag);
+
+					// Preserve the selection
+					// if (lastNode) {
+					//     range = range.cloneRange();
+					//     range.setStartAfter(lastNode);
+					//     range.collapse(true);
+					//     sel.removeAllRanges();
+					//     sel.addRange(range);
+					// }
+
+				} 
+
+			} else {
+
+			} 
+
+			updateBookmarks()
+		}
+
+		</script>
+	</body>
+</html>

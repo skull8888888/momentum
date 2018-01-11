@@ -1,0 +1,54 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/main-module.html",
+  "fragments": [
+    "src/landing/landing-module.html",
+    "src/home/home-module.html",
+    "src/editor/editor-module.html",
+    "src/editor/editor-bookmarks-module.html",
+    "src/editor/editor-canvas-module.html",
+    "src/editor/editor-formula-module.html",
+    "src/editor/editor-highlight-remove-module.html",
+    "src/editor/editor-tools-module.html"
+  ],
+  "sources": [
+    "bower.json",
+    "index.html",
+    "src/main-module.html",
+    "src/landing/landing-module.html",
+    "src/home/home-module.html",
+    "src/editor/editor-module.html",
+    "src/editor/editor-bookmarks-module.html",
+    "src/editor/editor-canvas-module.html",
+    "src/editor/editor-formula-module.html",
+    "src/editor/editor-highlight-remove-module.html",
+    "src/editor/editor-tools-module.html"
+  ],
+  "extraDependencies": [
+    "bower_components/webcomponentsjs/*.js",
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.js",
+    "src/editor/editor.html",
+    "src/editor/fabric.min.js",
+    "src/math-tex/math-tex.js",
+    "src/math-tex/mathjax-loader.js"
+  ],
+  "builds": [
+    {
+      "js": {
+        "minify": true
+      },
+      "css": {
+        "minify": true
+      },
+      "html": {
+        "minify": true
+      }
+    }
+  ],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  }
+}

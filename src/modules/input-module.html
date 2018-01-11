@@ -1,0 +1,55 @@
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+<dom-module id="input-module">
+  <template>
+    <style include="shared-styles">
+       paper-input{
+        
+        --paper-input-container-underline:{
+          display: none;
+          height:0px
+        }
+
+        --paper-input-container-input: {
+          font-size: 20px;
+        }
+
+        --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
+      }
+
+      #wrapper{
+        padding: 0px 4px;
+        background-color: var(--paper-grey-100)
+      }
+    </style>
+    <div id="wrapper">
+      <paper-input label="[[label]]" no-label-float value="{{value}}"></paper-input>
+    </div>
+  </template>
+  <script>
+    class InputModule extends Polymer.Element {
+
+      static get is() { return 'input-module' }
+
+      static get properties() {
+        return {
+          value: {
+            reflectsToAttributes: true,
+            notify: true
+          }
+        }
+      }
+
+      static get observers() {
+        return [
+        ]
+      }
+
+      connectedCallback(){
+        super.connectedCallback()
+      }
+
+    }
+    customElements.define(InputModule.is, InputModule);
+  </script>
+</dom-module>

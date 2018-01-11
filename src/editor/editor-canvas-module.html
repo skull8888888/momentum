@@ -1,0 +1,234 @@
+<dom-module id="editor-canvas-module">
+    <template>
+        <style include="shared-styles">
+
+			:host{
+				display: block;
+				background-color: var(--paper-grey-300);
+			}
+
+			.color{
+				border-radius:50%;
+				height: 20px;
+				width: 20px;
+				margin: 4px;
+				cursor: pointer
+			}
+			.color.iron-selected{
+				border: 2px solid black;
+				height: 16px;
+				width: 16px;
+				margin: 4px;
+			}
+			.toolwidth{
+				background-color: var(--paper-grey-400);
+				border-radius: 50%;
+				margin-left: 4px;
+				margin-right: 4px;
+				cursor: pointer
+			}
+
+			.tools{
+				height: 28px;
+				background-color: var(--paper-grey-300);
+			}
+
+			.tool{
+				padding: 0px 4px;
+				line-height: 28px;
+				font-size: 16px;
+				height: 28px;
+				cursor: pointer
+			}
+
+			.wrapper{
+				border-radius: 4px;
+				overflow: hidden;
+			}
+
+			.toolwidth.iron-selected{
+				background-color: var(--paper-grey-600)
+			}
+
+			.tool.iron-selected{
+				font-weight: 600
+			}
+			.spacer{
+				-ms-flex: 1 1 0.000000001px;
+				-webkit-flex: 1;
+				flex: 1;
+				-webkit-flex-basis: 0.000000001px;
+				flex-basis: 0.000000001px;
+			}
+        </style>
+		<canvas id="canvas"></canvas>
+		<div class="layout horizontal tools">
+			<iron-selector selected="{{selectedcolor}}" attr-for-selected="name" class="layout horizontal">
+				<template is="dom-repeat" items="[[colors]]" as="color">
+					<div class="color" name="[[color]]" style$="background-color:[[color]]">
+					</div>
+				</template>
+			</iron-selector>
+			<iron-selector selected="{{selectedtool}}" attr-for-selected="name" style="padding-left:32px" class="layout horizontal">
+				<span class="tool" name="pencil">Pencil</span>
+				<span class="tool" name="eraser">Eraser</span>
+			</iron-selector>
+			<iron-selector selected="{{selectedtoolwidth}}" attr-for-selected="name" style="padding-left:32px" class="layout horizontal center">
+				<template is="dom-repeat" items="[[toolWidths]]" as="toolwidth">
+					<div class="toolwidth" name="[[toolwidth]]" style$="width:[[toolwidth]];height:[[toolwidth]]">
+					</div>
+				</template>
+			</iron-selector>
+			<div class="spacer"></div>
+			<span class="tool" on-click="delete">Delete</span>
+		</div>
+    </template>
+    <script>
+        class EditorCanvasModule extends Polymer.Element {
+
+            static get is() { return 'editor-canvas-module' }
+
+            static get properties() {
+                return {
+					canvas: Object,
+					context: {
+						type: Object,
+						observer: 'contextChanged'
+					},
+					colors: {
+						type: Array,
+						value: [
+							'#000000',
+							'#F44336',
+							'#E91E63',
+							'#9C27B0',
+							'#673AB7',
+							'#3F51B5',
+							'#2196F3',
+						]
+					},
+					toolWidths:{
+						type: Array,
+						value: [
+							'5px',
+							'10px',
+							'15px',
+							'20px'
+						]
+					},
+					selectedcolor: {
+						type: String,
+						value: "",
+					},
+					selectedtoolwidth: {
+						type: String,
+						value: "",
+					},
+					selectedtool:{
+						type: String,
+						value: "",
+					}
+                }
+            }
+
+            static get observers() {
+                return [
+					'saveTools(selectedcolor,selectedtoolwidth, selectedtool, canvas)',
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+
+
+				if (this.canvas == undefined){
+					this.setCanvas()
+				}
+				
+
+				this.canvas.on('mouse:up',(e) => {
+
+					this.setAttribute('context', JSON.stringify(this.canvas.toJSON()))
+					this.dispatchEvent(new CustomEvent('context-changed',{bubbles: true, composed: true}))
+				})
+
+				this.canvas.renderAll();
+		
+			}
+
+			disconnectedCallback(){
+				updateBookmarks()
+			}
+
+			delete(){
+				this.remove()
+			}
+
+			setCanvas(){	
+				this.canvas = new fabric.Canvas(this.$.canvas)
+				this.canvas.backgroundColor = '#efefef'
+				this.canvas.isDrawingMode = 1
+
+				this.canvas.setHeight(window.innerHeight - window.innerHeight * .4)
+
+				console.log(window.innerWidth)
+
+				if(window.innerWidth > 500){
+					this.canvas.setWidth(window.innerWidth - window.innerWidth * .5)
+				} else {
+					this.canvas.setWidth(window.innerWidth - 16)	
+				}
+
+				console.log(this.canvas.width)
+
+			}
+
+			contextChanged(ctx){
+
+				if(ctx === undefined) return
+
+				if(this.canvas === undefined){
+					this.setCanvas()
+					this.canvas.loadFromJSON(ctx)
+				}
+			
+			}
+
+			saveTools(color,w,t,canvas){
+				if(!canvas) return
+
+				if(!color) {
+					this.selectedcolor = this.colors[0]
+					return
+				}
+
+				if(!w) {
+					this.selectedtoolwidth = this.toolWidths[0]
+					this.canvas.freeDrawingBrush.width = 5
+					return
+				}
+
+				if(!t){
+					this.selectedtool = 'pencil'
+					return
+				}
+
+				const width = w.slice(0, -1).slice(0, -1)
+				this.setAttribute('selectedtoolwidth', w)
+				this.setAttribute('selectedtool', t)
+				this.setAttribute('selectedcolor', color)
+				this.canvas.freeDrawingBrush.width = width
+
+				if(t != 'pencil'){
+					this.canvas.freeDrawingBrush.color = '#efefef'
+				} else {
+					this.canvas.freeDrawingBrush.color = color
+				}
+
+				this.dispatchEvent(new CustomEvent('context-changed',{bubbles: true, composed: true}))
+			}
+			
+        }
+        customElements.define(EditorCanvasModule.is, EditorCanvasModule);
+    </script>
+</dom-module>

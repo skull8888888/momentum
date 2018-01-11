@@ -1,0 +1,235 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+
+
+<link rel="import" href="shared-styles.html">
+
+<link href="https://fonts.googleapis.com/css?family=Lato:400,500,700|Roboto-Slab:600" rel="stylesheet">
+
+<script src="../bower_components/js-cookie/src/js.cookie.js"></script>
+<script src="../bower_components/moment/moment.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-firestore.js"></script>
+<script>
+  var config = {
+    apiKey: "AIzaSyAjyvmMKHB5v1v25-JvJpxQuaLSpTsJGA4",
+    authDomain: "momentum-2a71c.firebaseapp.com",
+    databaseURL: "https://momentum-2a71c.firebaseio.com",
+    projectId: "momentum-2a71c",
+    storageBucket: "momentum-2a71c.appspot.com",
+    messagingSenderId: "314824018866"
+  };
+  firebase.initializeApp(config)
+  const db = firebase.firestore();
+  const auth = firebase.auth()
+</script>
+
+<dom-module id="main-module">
+  <template>
+    <style>
+      :host {
+        --app-main-color: #e74c3c;
+        --app-secondary-color: black;
+        --paper-grey-50: #fafafa;
+        --paper-grey-100: #f5f5f5;
+        --paper-grey-200: #eeeeee;
+        --paper-grey-300: #e0e0e0;
+        --paper-grey-400: #bdbdbd;
+        --paper-grey-500: #9e9e9e;
+        --paper-grey-600: #757575;
+        --paper-grey-700: #616161;
+        --paper-grey-800: #424242;
+        --paper-grey-900: #212121;
+        display: block;
+        font-family: 'Lato'
+      }
+
+      app-header{
+        z-index: 1;
+      }
+
+      app-toolbar {
+        background-color: white;
+        border-bottom: 2px solid var(--paper-grey-200);       
+      }
+
+      iron-pages{
+        width: 100vw;
+        height: 100vh;
+      }
+
+      paper-button{
+        margin-right: 32px;
+      }
+
+      .nav{
+        margin-right: 112px;
+      }
+
+      [title]{
+        font-family: 'Roboto Slab', serif;
+        font-weight: 700;
+        margin-left: 112px;
+      }
+
+      a{
+        color: black
+      }
+
+      @media all and (max-width: 500px) {
+        [title]{
+          margin-left: 0
+        }
+        .nav{
+          margin: 0
+        }
+      }
+
+      #avatar{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+
+      }
+    </style>
+    <app-location id="location" route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+    <app-route
+        route="{{subroute}}"
+        pattern="/:id"
+        data="{{subrouteData}}">
+    </app-route>
+    <iron-pages selected="[[page]]"  attr-for-selected="name">
+      <editor-module name="editor" noteid="[[id]]"></editor-module>
+      <home-module name="home"></home-module>
+      <landing-module name="landing"></landing-module>
+    </iron-pages>
+  </template>
+  <script>
+    class MainModule extends Polymer.Element {
+
+      static get is() { return 'main-module'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          articleId: {
+            type: String
+          },
+          logged:Boolean,
+          rootPattern: String,
+          routerData: Object,
+          subroute: String,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+          '_subroutePageChanged(subrouteData.id)',
+        ];
+      }
+
+      constructor() {
+        super()
+        
+        // Get root pattern for app-route, for more info about `rootPath` see:
+        // https://www.polymer-project.org/2.0/docs/upgrade#urls-in-templates
+        this.rootPattern = (new URL(this.rootPath)).pathname;
+      }
+
+      connectedCallback(){
+        super.connectedCallback()
+        if(Cookies.get('id')){
+          this.logged = true
+        } else {
+          this.logged = false
+        }
+
+        // this.$.loginDialog.toggle()
+      }
+
+      showSignIn(){
+        this.$.login.page = 0
+        this.$.loginDialog.toggle()
+      }
+
+      _routePageChanged(page) {
+        // Polymer 2.0 will call with `undefined` on initialization.
+        // Ignore until we are properly called with a string.
+        if (page === undefined) {
+          return;
+        }
+
+        // If no page was found in the route data, page will be an empty string.
+        if(Cookies.get('id'))
+          this.page = page || 'home';
+        else
+          this.page = 'landing'
+        console.log(this.page)
+      }
+
+      _subroutePageChanged(id) {
+        if (id === undefined) {
+          // this.id = id
+          return
+        }
+        this.id = id
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl(page + "/" + page + '-module.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+      }
+
+      // _idChanged(id){
+      //   var resolvedPageUrl = this.resolveUrl(page + "/" + page + '-module.html');
+      //   Polymer.importHref(
+      //       resolvedPageUrl,
+      //       null,
+      //       this._showPage404.bind(this),
+      //       true);
+      // }
+
+      _showPage404() {
+        this.page = '404';
+      }
+    }
+
+    window.customElements.define(MainModule.is, MainModule);
+  </script>
+</dom-module>
+

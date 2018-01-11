@@ -1,0 +1,60 @@
+<dom-module id="editor-image-module">
+    <template>
+        <style include="shared-styles">
+
+            :host{
+                display: block
+            }
+
+            #caption:focus {
+              outline: none;
+            } 
+
+            img{
+                width: 100%;
+                margin-top: 16px;
+            }
+            
+            #caption:empty::before{
+                content: 'Caption'
+            }
+
+            #caption{
+                padding: 0 16px;
+                text-align: center;
+                color: var(--paper-grey-400);
+                font-size: 16px;
+                font-family: 'Lora', 'serif';
+                margin-bottom: 16px;
+            }
+
+        </style>
+        <img src="[[src]]">
+        <div contenteditable="true" id="caption">
+        </div>
+    </template>
+    <script>
+        class EditorImageModule extends Polymer.Element {
+
+            static get is() { return 'editor-image-module' }
+
+            static get properties() {
+                return {
+                    src: String
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+                this.$.caption.focus()
+            }
+
+        }
+        customElements.define(EditorImageModule.is, EditorImageModule);
+    </script>
+</dom-module>

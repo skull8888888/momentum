@@ -1,0 +1,8 @@
+{
+  "name": "momentum",
+  "short_name": "momentum",
+  "description": "simple, yet powerful note taking app for engineers ",
+  "start_url": "/",
+  "display": "standalone",
+  "version": "1.0.2"
+}

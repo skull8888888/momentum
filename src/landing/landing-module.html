@@ -1,0 +1,63 @@
+<link rel="import" href="../auth/login-module.html">
+<dom-module id="landing-module">
+	<template>
+		<style include="shared-styles">
+			:host{
+				display: block;
+			}
+			
+			.wrapper{
+				display: flex;  
+				flex-flow: row wrap;
+			}
+
+			.wrapper > * {
+				flex: 1 50vw;
+				height: 100vh
+			}
+
+			.promo{
+				background-color: var(--paper-grey-300);
+			}
+
+			@media all and (min-width: 600px) {
+				.aside { flex: 1 auto; }
+			}
+
+			@media all and (min-width: 800px) {
+				.promo { order: 1; width: 50vw} 
+				.join   { order: 2; width: 50vw}
+			}
+		</style>
+		<div class="wrapper">
+			<div class="promo">
+			</div>
+			<div class="join">
+				<login-module></login-module>
+			</div>
+		</div>
+	</template>
+	<script>
+		class LandingModule extends Polymer.Element {
+
+			static get is() { return 'landing-module' }
+
+			static get properties() {
+				return {
+				
+				}
+			}
+
+			static get observers() {
+				return [
+				]
+			}
+
+			connectedCallback(){
+				super.connectedCallback()
+
+			}
+		}
+		customElements.define(LandingModule.is, LandingModule);
+	</script>
+</dom-module>

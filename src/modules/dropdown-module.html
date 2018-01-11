@@ -1,0 +1,121 @@
+<dom-module id="dropdown-module">
+    <template>
+        <style include="shared-styles">
+
+            :host{
+                display: block;
+                margin-top: -4px
+            }
+
+            .dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropdown-content {
+                display: none;
+                min-width: 160px;
+                top: var(--content-top, 40px);
+                width: var(--content-width, 160px);
+                border-radius: 4px;
+                position: absolute;
+                left: 50%;
+                margin-left: var(--content-left, -65px);
+                border: solid var(--paper-grey-400) 1px;
+                background-color: white;
+            }
+            .show {display:block;}
+
+            #triangle{
+                position: absolute;
+                left: var(--triangle-left, 64px);
+                top: -10px;
+                z-index: 2;
+                background: white;
+                width:30px;
+                height: 30px;
+                -webkit-transform:rotate(45deg);
+                transform:rotate(45deg);
+                border-radius:8px;
+                border: solid var(--paper-grey-400) 1px;
+            }
+
+            #cover{
+                z-index: 6;
+                background-color: white;
+                width: 160px;
+                height: 30px;
+                border-radius: 8px;
+                position: absolute;
+            }
+            #content{   
+                position: relative;
+                background-color: white;
+                border-radius: 8px;
+                overflow:hidden;
+                z-index:10
+            }
+           
+        </style>
+        <div class="dropdown">
+            <div id="trigger">
+                <slot id="button" name="button" on-click="toggle"></slot>
+            </div>
+            <div id="dropdown" class="dropdown-content">
+                <div id="triangle"></div>
+                <div id="cover"></div>
+                <div id="content">
+                    <slot name="content"></slot>
+                </div>
+            </div>
+        </div>
+    </template>
+    <script>
+        class DropdownModule extends Polymer.Element {
+
+            static get is() { return 'dropdown-module' }
+
+            static get properties() {
+                return {
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+
+                document.addEventListener('click', e => {
+
+                    if(e.composedPath()[1] == this.parentNode || e.composedPath()[0] == this.parentNode){
+                        this.toggle()
+                    } else if (!this.isInside(e.composedPath(), this)){
+                        this.$.dropdown.classList.remove('show')
+                    }
+
+                })
+            }
+
+            isInside(arr,node){
+
+                var inside = false
+
+                arr.forEach((el) => {
+                    if (el == node) inside = true
+                }, this);
+
+                return inside
+            }
+            
+
+            toggle(){
+                this.$.dropdown.classList.toggle("show")
+            }
+
+        }
+        customElements.define(DropdownModule.is, DropdownModule);
+    </script>
+</dom-module>

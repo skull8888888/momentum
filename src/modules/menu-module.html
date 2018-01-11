@@ -1,0 +1,47 @@
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+
+<dom-module id="menu-module">
+    <template>
+        <style include="shared-styles">
+            a{
+                text-decoration: none;
+            }
+
+            .wrap{
+                font-size: 16px;
+                color: var(--paper-grey-600);
+                padding: 16px;
+            }
+        </style>
+        <div class="layout vertical wrap">
+            <a href="/editor">Issue an article</a>
+            <a>Profile</a>
+            <a>Sign out</a>
+        </div>
+    </template>
+    <script>
+        class MenuModule extends Polymer.Element {
+
+            static get is() { return 'menu-module' }
+
+            static get properties() {
+                return {
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+                console.log('r')
+            }
+
+        }
+        customElements.define(MenuModule.is, MenuModule);
+    </script>
+</dom-module>

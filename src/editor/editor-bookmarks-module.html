@@ -1,0 +1,98 @@
+<dom-module id="editor-bookmarks-module">
+    <template>
+        <style include="shared-styles">
+            :host{
+                display: block;
+                position: fixed;
+                z-index: 100;
+                width: 25vw;
+                left: calc(75vw + 8px);
+                height: calc(100vh - 64px);
+                /*background-color: var(--paper-grey-100);*/
+                top: 66px;
+            }
+
+            .wrap{
+                padding: 8px;
+            }
+
+            .bookmark{
+                padding: 8px;
+                border-radius: 4px;
+                width: 250px;
+                cursor: pointer
+            }
+
+            .highlight {
+                line-height: 22px;
+                color: var(--paper-grey-700);
+                background-color: var(--paper-grey-100);
+            }
+
+            .formula {
+                font-weight: 700;
+                background-color: var(--paper-grey-300);
+            }
+
+            @media all and (max-width: 800px) {
+               :host{
+                   display: block
+               }
+            }
+
+            @media all and (max-width: 500px) {
+                :host{
+                    display: none
+                }
+            }
+
+        </style>
+        <div>
+        <div class="wrapper" style="overflow:auto;height:calc(100vh - 66px);">
+            <iron-list id="list" as="bookmark">
+                <template>
+                    <div class="wrap">
+                        <div class$="bookmark [[bookmark.type]]" name="[[bookmark.id]]" on-click="scrollTo">
+                            [[bookmark.text]]
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+        </div>
+    </template>
+    <script>
+        class EditorBookmarksModule extends Polymer.Element {
+
+            static get is() { return 'editor-bookmarks-module' }
+
+            static get properties() {
+                return {
+                    bookmarks:{
+                        type: Array,
+                        observer: 'bookmarksChanged'
+                    }
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+            }
+
+            bookmarksChanged(bookmarks){
+                if(!bookmarks) return
+                this.$.list.items = bookmarks
+            }
+
+            scrollTo(e){
+                scrollToId(e.target.name)
+            }
+
+        }
+        customElements.define(EditorBookmarksModule.is, EditorBookmarksModule);
+    </script>
+</dom-module>

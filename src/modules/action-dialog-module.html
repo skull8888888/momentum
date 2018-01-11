@@ -1,0 +1,81 @@
+<link rel="import" href="../../bower_components/nebula-dialog/nebula-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="action-dialog-module">
+  <template>
+    <style include="iron-flex iron-flex-alignment">
+      :host {
+        display: block
+      }
+
+      #dialogContent{
+        width: 400px;
+        background-color: white;
+        border-radius: 4px;
+        overflow: hidden
+      }
+
+      .header {
+         font-size: 20px;
+         background-color: var(--paper-grey-200);
+         padding: 4px 8px;
+         border-bottom: 2px solid var(--paper-grey-300)
+      }
+
+      #title{
+        font-size: 20px;
+        /*font-weight: 600;*/
+      }
+
+      #actionButton {
+        cursor: pointer;
+        font-weight: 300;
+        color: var(--app-button-color)
+      }
+    </style>
+    <nebula-dialog
+        opened="{{opened}}"
+        id="dialog">
+        <div id="dialogContent">
+          <div class="header layout horizontal justified">
+            <div id="title">[[title]]</div>
+            <div id="actionButton">[[actionTitle]]</div>
+          </div>
+          <slot></slot>           
+        </div>
+      </nebula-dialog>
+  </template >
+  <script>
+    class ActionDialogModule extends Polymer.Element {
+      
+      static get is() { return 'action-dialog-module' }
+
+      static get properties(){
+        return {
+          title: String,
+          actionTitle: String
+        }
+      }
+
+      connectedCallback(){
+        super.connectedCallback()
+        
+        this.$.actionButton.addEventListener('click', e => {
+          this.dispatchEvent(new CustomEvent('action-click'))
+        })
+      }
+
+    
+
+      open(){
+        this.opened = true
+      }
+
+      close(){
+        this.opened = false
+      }
+    }
+    window.customElements.define(ActionDialogModule.is, ActionDialogModule)
+  </script>
+</dom-module>

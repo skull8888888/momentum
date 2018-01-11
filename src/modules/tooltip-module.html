@@ -1,0 +1,117 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="tooltip-module">
+    <template>
+        <style include="shared-styles">
+            #tooltip {
+                top: calc(100% + 12px);
+                width: var(--tooltip-width, 160px);
+                border-radius: 8px;
+                position: absolute;
+                z-index: 1;
+                left: 50%;
+                margin-left: var(--tooltip-margin-left, -80px);
+                border: solid var(--paper-grey-400) 1px;
+                background-color: white;
+            }
+
+            #tooltip:before {
+                content: '';
+                display: block;  
+                position: absolute;
+                left: var(--tooltip-left-before, calc(50% - 10px));
+                bottom: 100%;
+                width: 0;
+                height: 0;
+                border: 10px solid transparent;
+                border-bottom-color: var(--paper-grey-500);
+            }
+
+            #tooltip:after {
+               content: '';
+               display: block;  
+               position: absolute;
+               left: var(--tooltip-left-after,calc(50% - 9px));
+               bottom: 100%;
+               width: 0;
+               height: 400px;
+               border: 9px solid transparent;
+               border-bottom-color: white;
+            }
+
+            #tooltip {
+                /*visibility: hidden;*/
+                opacity: 0;
+            }
+        </style>
+        <span id="tooltip">
+            <slot></slot>
+        </span>
+    </template>
+    <script>
+        class TooltipModule extends Polymer.Element {
+
+            static get is() { return 'tooltip-module' }
+
+            static get properties() {
+                return {
+                    isHidden: {
+                        value: true,
+                        type:Boolean
+                    }
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+
+                document.addEventListener('click', e => {
+
+                    if(e.composedPath()[1] == this.parentNode || e.composedPath()[0] == this.parentNode){
+                        this.toggle()
+                    } else if (!this.isInside(e.composedPath(), this)){
+                        this.close()
+                    }
+
+                })
+
+            }
+
+            isInside(arr,node){
+
+                var inside = false
+
+                arr.forEach((el) => {
+                    if (el == node) inside = true
+                }, this);
+
+                return inside
+            }
+
+            close(){
+                this.$.tooltip.style.visibility = 'hidden'
+                this.$.tooltip.style.opacity = '0'
+                this.isHidden = true
+            }
+
+            toggle(){
+                
+                if(this.isHidden){
+                    this.$.tooltip.style.visibility = 'visible'
+                    this.$.tooltip.style.opacity = '1'
+                    this.isHidden = false
+                } else {
+                    this.$.tooltip.style.visibility = 'hidden'
+                    this.$.tooltip.style.opacity = '0'
+                    this.isHidden = true
+                }
+            }
+
+        }
+        customElements.define(TooltipModule.is, TooltipModule);
+    </script>

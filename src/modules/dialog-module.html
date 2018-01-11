@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="dialog-module">
+  <template>
+    <style include="shared-styles">
+     :host {
+        display: block
+      }
+
+      #dialogContent{
+        background-color: white;
+        overflow: hidden;
+        padding: 16px
+      }
+    </style>
+    <nebula-dialog
+        opened="{{opened}}"
+        id="dialog">
+      <div id="dialogContent">
+        <slot></slot>           
+      </div>
+    </nebula-dialog>
+  </template>
+  <script>
+    class DialogModule extends Polymer.Element {
+
+      static get is() { return 'dialog-module' }
+
+      static get properties() {
+        return {
+          opened: Boolean
+        }
+      }
+
+      static get observers() {
+        return [
+        ]
+      }
+
+      toggle(){
+        this.opened = !this.opened
+      }
+
+      open(){
+        this.opened = true
+      }
+
+      close(){
+        this.opened = true
+      }
+
+      connectedCallback(){
+        super.connectedCallback()
+      }
+
+    }
+    customElements.define(DialogModule.is, DialogModule);
+  </script>
+</dom-module>

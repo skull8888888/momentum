@@ -1,0 +1,31 @@
+<dom-module id="tags-module">
+    <template>
+        <style include="shared-styles">
+        </style>
+
+        <paper-input label="tags"></paper-input>
+        
+    </template>
+    <script>
+        class TagsModule extends Polymer.Element {
+
+            static get is() { return 'tags-module' }
+
+            static get properties() {
+                return {
+                }
+            }
+
+            static get observers() {
+                return [
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+            }
+
+        }
+        customElements.define(TagsModule.is, TagsModule);
+    </script>
+</dom-module>

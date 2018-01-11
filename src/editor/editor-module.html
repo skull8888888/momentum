@@ -1,0 +1,83 @@
+<dom-module id="editor-module">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      iframe{
+        border: none;
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+        top: 0
+      }
+      .logo{
+        position: fixed;
+        top: 8px;
+        text-align: center;
+        width: 48px;
+        z-index: 200;
+        font-weight: 800;
+        font-size: 28px;
+        padding-bottom: 8px;
+        text-decoration: none;
+        color:black;
+      }
+    </style>
+    <editor-app></editor-app>
+    <!--<a class="logo" href="/">M</a>
+    <iframe id="editor" src="../src/editor/editor.html"></iframe>-->
+  </template>
+  
+  <script>
+
+    class Editor extends HTMLElement {
+
+      constructor(){
+        super()
+        this.innerHTML = `
+          <div contenteditable></div>
+          <button onclick="this.c.bind(this)">OK</button>
+        `
+      }
+
+      connectedCallback(){
+
+      }
+
+      c(){
+        alert('ok')
+      }
+    }
+    customElements.define('editor-app', Editor);
+
+    class EditorModule extends Polymer.Element {
+      static get is() { return 'editor-module'; }
+
+      static get properties(){
+        return {
+          noteid: String
+        }
+      }
+
+
+      static get observers() {
+        return [
+          'noteIdChanged(noteid)',
+        ];
+      }
+
+      connectedCallback(){
+        super.connectedCallback()
+      }      
+
+      noteIdChanged(noteId){
+        // if(this.$.editor.contentWindow.reload){
+        //   this.$.editor.contentWindow.reload(noteId)
+        // }
+      }
+
+    }
+    customElements.define(EditorModule.is, EditorModule);
+  </script>
+</dom-module>

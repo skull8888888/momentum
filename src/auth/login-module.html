@@ -1,0 +1,87 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="join-module.html">
+
+<dom-module id="login-module">
+  <template>
+    <style include="shared-styles">
+
+      :host{
+        display: block
+      }
+
+      paper-input{
+        margin-top: 16px
+      }
+
+      .login{
+        height: 100vh
+      }
+
+    </style>
+
+    <iron-pages selected="{{page}}">
+      <div class="login layout horizontal vertical center-center">
+        <div class="wrapper">
+          <h1>Login to Momentum</h1>
+          <iron-form id="form">
+            <form>
+              <paper-input label="Email" no-label-float value="{{email}}" required></paper-input>
+              <paper-input label="Password" no-label-float value="{{password}}" type="password" required></paper-input>
+            </form>
+          </iron-form>
+          <div class="layout horizontal justified" style="margin:16px 0px">
+            <div class="smallButton" on-click="join">Create account</div>
+            <div class="button" on-click="login">Log in</div>
+          </div>
+        </div>
+      </div>
+      <join-module></join-module>
+    </iron-pages>
+  </template>
+  <script>
+    class LoginModule extends Polymer.Element {
+
+      static get is() { return 'login-module' }
+
+      static get properties() {
+        return {
+          page:{
+            type: Number,
+            value:0
+          }
+        }
+      }
+
+      static get observers() {
+        return [
+        ]
+      }
+
+      login(){
+        if(this.$.form.validate()){
+          auth.signInWithEmailAndPassword(this.email, this.password).then(user => {
+            Cookies.set('id',user.uid,{expires: 10000,path:''})
+            window.location.href = '/'
+          }).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            alert(errorMessage)
+            // ...
+          })
+        }
+      }
+
+      join(){
+        this.page = 1
+      }
+
+      connectedCallback(){
+        super.connectedCallback()
+
+      }
+
+    }
+    customElements.define(LoginModule.is, LoginModule);
+  </script>
+</dom-module>

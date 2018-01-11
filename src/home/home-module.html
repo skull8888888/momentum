@@ -1,0 +1,318 @@
+<!--<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">-->
+<link rel="import" href="home-note-module.html">
+<link rel="import" href="home-create-subject-module.html">
+<link rel="import" href="home-menu-module.html">
+<link rel="import" href="../modules/dropdown-module.html">
+
+<dom-module id="home-module">
+    <template>
+        <style include="shared-styles">
+
+            :host{
+                display: block;
+                width: 100vw;
+                height: 100%;
+                --app-drawer-width: 350px;
+            } 
+            
+            #subjects{
+                width: 100%;
+                height: calc(100vh - 64px);
+                overflow: scroll
+            }
+
+            .subject{
+                width: 100%;
+                height: 40px;
+                line-height: 40px;
+                padding-left: 16px;
+                font-size: 16px;
+                color: var(--paper-grey-800);
+            }
+         
+            #body{
+                /*background-color: var(--paper-grey-100);*/
+                height: calc(100vh - 66px);
+            }
+
+            .note{
+                padding: 0px 16px 8px 16px;
+            }
+
+            a{
+                text-decoration: none;
+                color: black;
+            }
+
+            app-header{
+                border-bottom: 2px solid var(--paper-grey-300)
+            }
+
+            .drawer{
+                margin-top: 66px;
+                background-color: var(--paper-grey-100)
+            }
+    
+            #subjectsHeader{
+                height: 64px;
+                padding: 0px 16px;
+                color: var(--paper-grey-600);
+            }
+
+            h2{
+                margin: 0;
+            }
+
+            iron-icon{
+                padding: 0;
+                height: 24px;
+                width: 24px;
+                color: var(--paper-grey-600);
+                left: 0;
+                margin-left: 32px;
+                cursor: pointer
+            }
+
+            app-header-layout:not([narrow]) [drawer-toggle] {
+              display: none;
+            }
+            
+            #newSubject{
+                --content-width: 300px;
+                --content-left: -100px;
+                --triangle-left: 100px
+            }
+         
+            .subject.iron-selected{
+                background-color: var(--paper-grey-200)
+            }
+
+            paper-progress{
+              width: 100vw;
+              --paper-progress-active-color: var(--app-main-color);
+              --paper-progress-height: 2px
+            }
+
+            #createIcon{
+                color: var(--app-main-color);
+            }
+            .title{
+                height: 64px;
+                padding: 0px 16px;
+                background-color: white;
+                position: absolute;
+                color: var(--app-main-color);
+                font-size: 20px;
+                font-weight: 600;
+                opacity: 0.9;
+                width: calc(100% - 44px);
+                z-index: 2;
+                line-height: 64px;
+            }
+
+            #list{
+                z-index: 1;
+                padding-top: 64px;
+                height: calc(100vh - 130px)
+            }
+            [main-title]{
+                font-family: 'Roboto Slab';
+                font-size: 22px;
+            }
+            #menu{
+                --content-width: 180px;
+                --content-left: -130px;
+                --triangle-left: 130px
+            }
+        </style>
+        <app-header-layout>
+            <app-header slot="header" fixed>
+                <app-toolbar class="layout horizontal justified">
+                    <paper-icon-button icon="icons:menu" drawer-toggle></paper-icon-button>
+                    <div main-title>Momentum</div>
+                    <iron-icon icon="icons:search"></iron-icon>
+                    <dropdown-module id="menu">
+                        <iron-icon slot="button" icon="social:person" id="showMenu" noink></iron-icon>   
+                        <home-menu-module slot="content"></home-menu-module>
+                    </dropdown-module>
+                    <iron-icon id="createIcon" icon="icons:create" on-click="createNote"></iron-icon>
+                </app-toolbar>
+                <paper-progress id="progress" indeterminate="{{loading}}"></paper-progress>
+            </app-header>
+            <app-drawer-layout>
+                <app-drawer slot="drawer">
+                    <div class="drawer">
+                        <div id="subjectsHeader" class="layout horizontal center justified">
+                            <div>Subjects</div>
+                            <dropdown-module id="newSubject">
+                                <iron-icon slot="button" icon="icons:add" id="addSubjectIcon" noink></iron-icon>   
+                                <home-create-subject-module slot="content"></home-create-subject-module>
+                            </dropdown-module>
+                        </div>
+                        <div id="subjects">
+                            <iron-selector selected="{{selectedSubjectIndex}}">
+                                <template is="dom-repeat" id="subjectsList" items="[[subjects]]" as="subject">
+                                    <div class="subject">[[subject.name]]</div>
+                                </template>
+                            </iron-selector>
+                        </div>
+                    </div>
+                </app-drawer>
+                <div id="body">
+                    <div class="title">[[selectedSubject.name]]</div>
+                    <div id="list" style="overflow: scroll;">
+                        <iron-list scroll-target="list" id="notes" items="[[notes]]" as="note">
+                            <template>
+                                <div class="note">
+                                    <a href="/editor/[[note.id]]">
+                                        <home-note-module note="[[note]]">
+                                        </home-note-module>      
+                                    </a>
+                                </div>
+                            </template>
+                        </iron-list>
+                    </div>
+                </div>
+            </app-drawer-layout>
+        </app-header-layout>
+    </template>
+    <script>
+        class homeModule extends Polymer.Element {
+
+            static get is() { return 'home-module' }
+
+            static get properties() {
+                return {
+                    notes: {
+                        type: Array,
+                    },
+                    subjects: {
+                        type: Array,
+                    },
+                    last: Object,
+                    unsubscribe: Object,
+                    
+                }
+            }
+
+            static get observers() {
+                return [
+                    'selectedSubjectIndexChanged(selectedSubjectIndex)'
+                ]
+            }
+
+            connectedCallback(){
+                super.connectedCallback()
+                this.loading = true
+                db.collection('users').doc(Cookies.get('id')).collection('subjects').onSnapshot((doc) => {
+
+                    var subjects = []
+
+                    doc.forEach(function(doc) {
+                        var subject = doc.data()
+                        subject.id = doc.id
+                        subjects.unshift(subject)
+                    }, this);
+                    this.subjects = subjects
+
+                    if(Cookies.get('selectedSubjectIndex')) {
+                        this.selectedSubjectIndex = Cookies.get('selectedSubjectIndex')
+                    } else {
+                        this.selectedSubjectIndex = 0
+                    }
+                    this.loading = false
+
+                })
+
+            }
+
+            selectedSubjectIndexChanged(index){
+
+                Cookies.set('selectedSubjectIndex', index,{expires: 10000,path:''})
+                this.loading = true
+                this.notes = []
+
+                this.selectedSubject = this.subjects[index]
+
+                if(!this.selectedSubject) return
+
+                if(this.unsubscribe) this.unsubscribe()
+
+                if(this.selectedSubject.name == "All Notes"){
+                
+                    this.unsubscribe = db.collection('notes').where('auth','==',Cookies.get('id')).orderBy('modified').onSnapshot((doc) => {
+
+                        var notes = []
+
+                        doc.forEach(function(doc) {
+                            var note = doc.data()
+                            note.id = doc.id
+                            notes.unshift(note)
+                        }, this);
+
+                        this.notes = notes
+                        this.loading = false
+                    })
+
+                } else {
+                     this.unsubscribe = db.collection('notes').where('subject','==',this.selectedSubject.id).orderBy('modified').onSnapshot((doc) => {
+
+                        var notes = []
+
+                        doc.forEach(function(doc) {
+                            var note = doc.data()
+                            note.id = doc.id
+                            notes.unshift(note)
+                        }, this);
+
+                        this.notes = notes
+                        this.loading = false
+                    });
+                }
+            
+            }
+
+            createSubject(){
+                this.$.addSubjectTooltip.toggle()
+            }
+
+            createNote(){
+
+                if(this.selectedSubject.id){
+                    const batch = db.batch()
+
+                    const noteId = db.collection('notes').doc().id
+                    const noteRef = db.collection('notes').doc(noteId)
+                    const fullNoteRef = db.collection('fullNotes').doc(noteId)
+
+                    batch.set(noteRef,{
+                        auth: Cookies.get('id'),
+                        created: Date.now(),
+                        modified: Date.now(),
+                        subject: this.selectedSubject.id,
+                        name: 'New Note ' + moment().format('MMM Do YY, hh:mm:ss')
+                    })
+
+                    batch.set(fullNoteRef,{
+                        innerHTML: `
+                            <h2 id="name"></h2>
+                            <p></p>
+                        `,
+                        initialName: 'New Note ' + moment().format('MMM Do YY, hh:mm:ss')
+                    })
+
+                    batch
+
+                    batch.commit().then(_ => {
+                        const a = document.createElement('a')
+                        a.setAttribute('href','/editor/' + noteId)
+                        a.click()
+                    })
+                }
+                
+            }
+
+        }
+        customElements.define(homeModule.is, homeModule);
+    </script>
+</dom-module>
